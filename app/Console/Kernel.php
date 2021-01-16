@@ -25,7 +25,7 @@ class Kernel extends ConsoleKernel
     protected function schedule(Schedule $schedule)
     {
         $schedule->call(function () {
-            \Log::debug("At laravel scheduler test");
+            \Log::debug("At laravel scheduler");
             \App\Jobs\WorkerTest::dispatch();
         })->everyMinute();
         // $schedule->command('inspire')

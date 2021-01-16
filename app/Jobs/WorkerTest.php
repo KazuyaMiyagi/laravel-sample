@@ -29,6 +29,6 @@ class WorkerTest implements ShouldQueue
      */
     public function handle()
     {
-        \Log::debug("At Laravel worker test");
+        \Log::debug("At Laravel worker");
     }
 }
