@@ -1,5 +1,5 @@
-FROM composer:2 AS Composer
-FROM php:7.4-apache AS Release
+FROM composer:2 AS composer
+FROM php:7.4-apache AS release
 
 # Composer settings
 ENV COMPOSER_HOME /usr/local/lib/composer
@@ -7,8 +7,8 @@ ENV COMPOSER_ALLOW_SUPERUSER 1
 ENV COMPOSER_CACHE_DIR /dev/null
 
 # Install composer
-COPY --from=Composer /usr/bin/composer /usr/bin/composer
-COPY --from=Composer /tmp/keys.dev.pub /tmp/keys.tags.pub ${COMPOSER_HOME}/
+COPY --from=composer /usr/bin/composer /usr/bin/composer
+COPY --from=composer /tmp/keys.dev.pub /tmp/keys.tags.pub ${COMPOSER_HOME}/
 
 # Install OS Packages
 RUN apt update \
@@ -57,7 +57,7 @@ RUN composer install --no-dev
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["laravel"]
 
-FROM Release AS Develop
+FROM release AS develop
 
 # Install Composer packages with development package
 RUN composer install --dev
