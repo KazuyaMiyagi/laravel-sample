@@ -1,0 +1,85 @@
+version: 0.2
+
+##
+# These environment variables are set automatically.
+# - AWS_REGION
+# - CODEBUILD_BUILD_ARN
+# For details, please see here.
+# https://docs.aws.amazon.com/en_us/codebuild/latest/userguide/build-env-ref-env-vars.html
+#
+# These environment variables are injected from the codebuild settings
+# - ECR_REPOSITORY_NAME
+# - TARGET_STAGE
+# - ARTIFACT_DIR
+# - DOCKERHUB_USERNAME
+# - DOCKERHUB_PASSWORD
+env:
+  git-credential-helper: yes
+  variables:
+    DOCKER_BUILDKIT: 1
+    ECR_REPOSITORY_NAME: "laravel"
+    TARGET_STAGE : "release"
+phases:
+
+  pre_build:
+    commands:
+      # CODEBUILD_BUILD_ARN: The Amazon Resource Name (ARN) of the build (for example, arn:aws:codebuild:region-ID:account-ID:build/codebuild-demo-project:b1e6661e-e4f2-4156-9ab9-82a19EXAMPLE).
+      - AWS_ACCOUNT_ID=$(echo ${CODEBUILD_BUILD_ARN} | cut -d ':' -f 5)
+      - REPOSITORY_URI=${AWS_ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com/${ECR_REPOSITORY_NAME}
+      - IMAGE_TAG=$(git rev-parse HEAD)
+
+      # DockerHub login
+      - docker login --username ${DOCKERHUB_USERNAME} --password ${DOCKERHUB_PASSWORD}
+
+      # ECR login
+      - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
+  build:
+    commands:
+      - docker build --target ${TARGET_STAGE} --tag ${REPOSITORY_URI}:${IMAGE_TAG} .
+      - docker tag ${REPOSITORY_URI}:${IMAGE_TAG} ${REPOSITORY_URI}:latest
+
+  post_build:
+    commands:
+      - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
+      - docker push ${REPOSITORY_URI}:latest
+
+      # Create deploy config files
+      - mkdir $ARTIFACT_DIR
+
+      # Create imagedefinitions.json
+      # https://docs.aws.amazon.com/codepipeline/latest/userguide/file-reference.html#pipelines-create-image-definitions
+      - printf '[{"name":"laravel-scheduler","imageUri":"%s"}]' "${REPOSITORY_URI}:${IMAGE_TAG}" | tee ${ARTIFACT_DIR}/laravel-scheduler-imagedefinitions.json
+      - printf '[{"name":"laravel-worker","imageUri":"%s"}]' "${REPOSITORY_URI}:${IMAGE_TAG}" | tee ${ARTIFACT_DIR}/laravel-worker-imagedefinitions.json
+
+      # Create imageDetail.json
+      # https://docs.aws.amazon.com/codepipeline/latest/userguide/file-reference.html#file-reference-ecs-bluegreen
+      - printf '{"ImageURI":"%s"}' "${REPOSITORY_URI}:${IMAGE_TAG}" | tee ${ARTIFACT_DIR}/imageDetail.json
+
+      # Create taskdef.json
+      # https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-ecs-ecr-codedeploy.html#tutorials-ecs-ecr-codedeploy-taskdefinition
+      - aws ecs describe-task-definition --task-definition laravel > /tmp/taskdef.json
+      - jq ".taskDefinition.containerDefinitions[].image |= \"<IMAGE_NAME>\" | .taskDefinition" < /tmp/taskdef.json | tee ${ARTIFACT_DIR}/taskdef.json
+
+      # Create appspec.yaml
+      # https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-ecs-ecr-codedeploy.html#tutorials-ecs-ecr-codedeploy-taskdefinition
+      - |
+        cat << EOF > ${ARTIFACT_DIR}/appspec.yaml
+        version: 0.0
+        Resources:
+          - TargetService:
+              Type: AWS::ECS::Service
+              Properties:
+                TaskDefinition: "<TASK_DEFINITION>"
+                LoadBalancerInfo:
+                  ContainerName: "laravel"
+                  ContainerPort: 80
+        EOF
+
+artifacts:
+  files:
+    - laravel-scheduler-imagedefinitions.json
+    - laravel-worker-imagedefinitions.json
+    - imageDetail.json
+    - taskdef.json
+    - appspec.yaml
+  base-directory: $ARTIFACT_DIR
