@@ -1,5 +1,5 @@
 FROM composer:2 AS composer
-FROM php:7.4-apache AS release
+FROM php:7.4-fpm AS release
 
 # Composer settings
 ENV COMPOSER_HOME /usr/local/lib/composer
@@ -14,6 +14,10 @@ COPY --from=composer /tmp/keys.dev.pub /tmp/keys.tags.pub ${COMPOSER_HOME}/
 RUN apt update \
     && apt upgrade --yes \
     && apt install --yes --no-install-recommends \
+        # tiny is small init module https://github.com/krallin/tini \
+        tini \
+        # Web server
+        nginx \
         # for composer
         unzip \
         # for laravel-scheduler
@@ -29,9 +33,6 @@ RUN apt update \
     && apt clean \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache mod_rewrite
-RUN a2enmod rewrite
-
 # Install PHP Extensions
 RUN pecl install \
         redis \
@@ -43,9 +44,9 @@ RUN pecl install \
 # Copy middleware config files
 COPY rootfs/ /
 
-WORKDIR /var/www/app
+WORKDIR /usr/src/app
 
-# Copy all source files to /var/www/app for production.
+# Copy all source files to /usr/src/app for production.
 # But available to overwrite by volume option when development.
 COPY . .
 

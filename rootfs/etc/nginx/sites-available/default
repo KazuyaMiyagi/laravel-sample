@@ -1,0 +1,35 @@
+# Disable response nginx version in the "Server" header field. (Default: on)
+# http://nginx.org/en/docs/http/ngx_http_core_module.html#server_tokens
+server_tokens off;
+
+upstream php-fpm {
+    server 127.0.0.1:9000;
+}
+
+server {
+    listen 80;
+    server_name _;
+
+    # http://nginx.org/en/docs/http/ngx_http_core_module.html#client_max_body_size
+    client_max_body_size 40m;
+
+    access_log /dev/stdout;
+    error_log /dev/stderr;
+
+    root /usr/src/app/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php$is_args$args;
+    }
+
+    location ~ \.php$ {
+        try_files $uri /index.php =404;
+        fastcgi_pass php-fpm;
+        fastcgi_index index.php;
+        fastcgi_buffers 16 16k;
+        fastcgi_buffer_size 32k;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
