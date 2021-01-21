@@ -1,3 +1,7 @@
+variable "domain_name" {
+  type = string
+}
+
 variable "laravel_repository" {
   type = string
 }

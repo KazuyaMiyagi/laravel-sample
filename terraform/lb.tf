@@ -52,19 +52,56 @@ resource "aws_lb_target_group" "green" {
   ]
 }
 
-resource "aws_lb_listener" "main" {
+resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.arn
   port              = 80
   protocol          = "HTTP"
+
   default_action {
+    type = "redirect"
+
+    redirect {
+      port        = "443"
+      protocol    = "HTTPS"
+      status_code = "HTTP_301"
+    }
+  }
+}
+
+resource "aws_lb_listener" "https" {
+  load_balancer_arn = aws_lb.main.arn
+  port              = 443
+  protocol          = "HTTPS"
+  ssl_policy        = "ELBSecurityPolicy-2016-08"
+  certificate_arn   = aws_acm_certificate.main.arn
+
+  default_action {
+    type = "fixed-response"
+    fixed_response {
+      content_type = "text/plain"
+      message_body = "Bad Request"
+      status_code  = 400
+    }
+  }
+}
+
+resource "aws_alb_listener_rule" "https" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 1
+
+  action {
     type             = "forward"
     target_group_arn = aws_lb_target_group.blue.arn
-    # TODO デフォルト400 のケース
-    #  type = "fixed-response"
-    #  fixed_response {
-    #    content_type = "text/plain"
-    #    message_body = "Bad Request"
-    #    status_code  = 400
-    #  }
+  }
+
+  condition {
+    host_header {
+      values = ["laravel.${var.domain_name}"]
+    }
+  }
+
+  # CodeDeploy automatically changes the target group
+  lifecycle {
+    ignore_changes = [action]
   }
 }
