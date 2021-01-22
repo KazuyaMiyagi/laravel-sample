@@ -96,7 +96,7 @@ resource "aws_alb_listener_rule" "https" {
 
   condition {
     host_header {
-      values = ["laravel.${var.domain_name}"]
+      values = ["www.${var.domain_name}"]
     }
   }
 

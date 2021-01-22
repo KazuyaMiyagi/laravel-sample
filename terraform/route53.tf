@@ -4,9 +4,9 @@ resource "aws_route53_zone" "main" {
   force_destroy = "false"
 }
 
-resource "aws_route53_record" "laravel" {
+resource "aws_route53_record" "www" {
   zone_id         = aws_route53_zone.main.zone_id
-  name            = "laravel"
+  name            = "www"
   type            = "A"
   allow_overwrite = "true"
 
