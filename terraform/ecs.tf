@@ -1,20 +1,25 @@
-resource "aws_ecs_cluster" "laravel" {
-  name = "laravel"
+resource "aws_ecs_cluster" "main" {
+  name = var.application
+  setting {
+    name  = "containerInsights"
+    value = "enabled"
+  }
 }
 
-resource "aws_ecs_task_definition" "laravel" {
-  family             = "laravel"
+resource "aws_ecs_task_definition" "main" {
+  family             = var.application
   network_mode       = "awsvpc"
-  cpu                = "256"
-  memory             = "512"
+  cpu                = var.ecs_cpu
+  memory             = var.ecs_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions = templatefile("templates/laravel.json.tmpl", {
-    name           = "laravel"
-    image          = "${aws_ecr_repository.laravel.repository_url}:latest"
-    command        = "laravel"
-    awslogs_group  = "/ecs/laravel"
+  task_role_arn      = aws_iam_role.ecs_task_role.arn
+  container_definitions = templatefile("templates/taskdef.json.tpl", {
+    name           = var.application
+    image          = "${aws_ecr_repository.main.repository_url}:latest"
+    command        = var.laravel_command
+    awslogs_group  = local.cloudwatch_log_group_name.main
     awslogs_region = data.aws_region.current.name
-    secrets_arn    = aws_secretsmanager_secret.laravel.arn
+    secrets_arn    = aws_secretsmanager_secret.main.arn
   })
 
   requires_compatibilities = [
@@ -22,14 +27,15 @@ resource "aws_ecs_task_definition" "laravel" {
   ]
 }
 
-resource "aws_ecs_service" "laravel" {
-  name                               = "laravel"
-  cluster                            = aws_ecs_cluster.laravel.arn
-  task_definition                    = aws_ecs_task_definition.laravel.arn
-  desired_count                      = 1
+resource "aws_ecs_service" "main" {
+  name                               = var.application
+  cluster                            = aws_ecs_cluster.main.arn
+  task_definition                    = aws_ecs_task_definition.main.arn
+  desired_count                      = 0
   launch_type                        = "FARGATE"
-  deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
+  health_check_grace_period_seconds  = 60
 
   deployment_controller {
     type = "CODE_DEPLOY"
@@ -41,14 +47,14 @@ resource "aws_ecs_service" "laravel" {
       aws_subnet.public_1.id
     ]
     security_groups = [
-      aws_security_group.laravel.id
+      aws_security_group.main.id
     ]
     assign_public_ip = true
   }
 
   load_balancer {
-    target_group_arn = aws_lb_target_group.blue.arn
-    container_name   = "laravel"
+    target_group_arn = aws_lb_target_group.blue-green[0].arn
+    container_name   = var.application
     container_port   = 80
   }
 
@@ -66,30 +72,30 @@ resource "aws_ecs_service" "laravel" {
   ]
 }
 
-resource "aws_ecs_task_definition" "laravel_scheduler" {
-  family             = "laravel-scheduler"
+resource "aws_ecs_task_definition" "scheduler" {
+  family             = "${var.application}-scheduler"
   network_mode       = "awsvpc"
-  cpu                = "256"
-  memory             = "512"
+  cpu                = var.ecs_cpu
+  memory             = var.ecs_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions = templatefile("templates/laravel.json.tmpl", {
-    name           = "laravel-scheduler"
-    image          = "${aws_ecr_repository.laravel.repository_url}:latest"
-    command        = "laravel-scheduler"
-    awslogs_group  = "/ecs/laravel-scheduler"
+  container_definitions = templatefile("templates/taskdef.json.tpl", {
+    name           = "${var.application}-scheduler"
+    image          = "${aws_ecr_repository.main.repository_url}:latest"
+    command        = var.scheduler_command
+    awslogs_group  = local.cloudwatch_log_group_name.scheduler
     awslogs_region = data.aws_region.current.name
-    secrets_arn    = aws_secretsmanager_secret.laravel.arn
+    secrets_arn    = aws_secretsmanager_secret.main.arn
   })
   requires_compatibilities = [
     "FARGATE",
   ]
 }
 
-resource "aws_ecs_service" "laravel_scheduler" {
-  name                               = "laravel-scheduler"
-  cluster                            = aws_ecs_cluster.laravel.arn
-  task_definition                    = aws_ecs_task_definition.laravel_scheduler.arn
-  desired_count                      = 1
+resource "aws_ecs_service" "scheduler" {
+  name                               = "${var.application}-scheduler"
+  cluster                            = aws_ecs_cluster.main.arn
+  task_definition                    = aws_ecs_task_definition.scheduler.arn
+  desired_count                      = 0
   launch_type                        = "FARGATE"
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
@@ -100,7 +106,7 @@ resource "aws_ecs_service" "laravel_scheduler" {
       aws_subnet.public_1.id
     ]
     security_groups = [
-      aws_security_group.laravel.id
+      aws_security_group.main.id
     ]
     assign_public_ip = true
   }
@@ -113,30 +119,30 @@ resource "aws_ecs_service" "laravel_scheduler" {
   }
 }
 
-resource "aws_ecs_task_definition" "laravel_worker" {
-  family             = "laravel-worker"
+resource "aws_ecs_task_definition" "worker" {
+  family             = "${var.application}-worker"
   network_mode       = "awsvpc"
-  cpu                = "256"
-  memory             = "512"
+  cpu                = var.ecs_cpu
+  memory             = var.ecs_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions = templatefile("templates/laravel.json.tmpl", {
-    name           = "laravel-worker"
-    image          = "${aws_ecr_repository.laravel.repository_url}:latest"
-    command        = "laravel-worker"
-    awslogs_group  = "/ecs/laravel-worker"
+  container_definitions = templatefile("templates/taskdef.json.tpl", {
+    name           = "${var.application}-worker"
+    image          = "${aws_ecr_repository.main.repository_url}:latest"
+    command        = var.worker_command
+    awslogs_group  = local.cloudwatch_log_group_name.worker
     awslogs_region = data.aws_region.current.name
-    secrets_arn    = aws_secretsmanager_secret.laravel.arn
+    secrets_arn    = aws_secretsmanager_secret.main.arn
   })
   requires_compatibilities = [
     "FARGATE",
   ]
 }
 
-resource "aws_ecs_service" "laravel_worker" {
-  name                               = "laravel-worker"
-  cluster                            = aws_ecs_cluster.laravel.arn
-  task_definition                    = aws_ecs_task_definition.laravel_worker.arn
-  desired_count                      = 1
+resource "aws_ecs_service" "worker" {
+  name                               = "${var.application}-worker"
+  cluster                            = aws_ecs_cluster.main.arn
+  task_definition                    = aws_ecs_task_definition.worker.arn
+  desired_count                      = 0
   launch_type                        = "FARGATE"
   deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
@@ -147,7 +153,7 @@ resource "aws_ecs_service" "laravel_worker" {
       aws_subnet.public_1.id
     ]
     security_groups = [
-      aws_security_group.laravel.id
+      aws_security_group.main.id
     ]
     assign_public_ip = true
   }

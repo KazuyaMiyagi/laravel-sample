@@ -1,11 +1,11 @@
 resource "aws_codedeploy_app" "main" {
   compute_platform = "ECS"
-  name             = "laravel"
+  name             = var.application
 }
 
 resource "aws_codedeploy_deployment_group" "main" {
   app_name               = aws_codedeploy_app.main.name
-  deployment_group_name  = "laravel"
+  deployment_group_name  = var.application
   service_role_arn       = aws_iam_role.codedeploy.arn
   deployment_config_name = "CodeDeployDefault.ECSAllAtOnce"
 
@@ -31,8 +31,8 @@ resource "aws_codedeploy_deployment_group" "main" {
   }
 
   ecs_service {
-    cluster_name = aws_ecs_cluster.laravel.name
-    service_name = aws_ecs_service.laravel.name
+    cluster_name = aws_ecs_cluster.main.name
+    service_name = aws_ecs_service.main.name
   }
 
   load_balancer_info {
@@ -42,11 +42,11 @@ resource "aws_codedeploy_deployment_group" "main" {
       }
 
       target_group {
-        name = aws_lb_target_group.blue.name
+        name = aws_lb_target_group.blue-green[0].name
       }
 
       target_group {
-        name = aws_lb_target_group.green.name
+        name = aws_lb_target_group.blue-green[1].name
       }
     }
   }

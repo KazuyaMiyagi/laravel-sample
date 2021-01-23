@@ -1,5 +1,5 @@
-resource "aws_security_group" "laravel" {
-  name   = "laravel"
+resource "aws_security_group" "main" {
+  name   = var.application
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -17,12 +17,12 @@ resource "aws_security_group" "laravel" {
   }
 
   tags = {
-    Name = "laravel"
+    Name = var.application
   }
 }
 
 resource "aws_security_group" "lb" {
-  name   = "lb"
+  name   = "${var.application}-lb"
   vpc_id = aws_vpc.main.id
 
   ingress {
@@ -47,7 +47,7 @@ resource "aws_security_group" "lb" {
   }
 
   tags = {
-    Name = "lb"
+    Name = "${var.application}-lb"
   }
 }
 
@@ -59,7 +59,7 @@ resource "aws_security_group" "elasticache" {
     from_port       = 6379
     to_port         = 6379
     protocol        = "tcp"
-    security_groups = [aws_security_group.laravel.id]
+    security_groups = [aws_security_group.main.id]
   }
 
   egress {
@@ -70,6 +70,6 @@ resource "aws_security_group" "elasticache" {
   }
 
   tags = {
-    Name = "elasticache"
+    Name = "${var.application}-elasticache"
   }
 }

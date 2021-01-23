@@ -1,10 +1,10 @@
 locals {
   cloudwatch_log_group_name = {
-    main      = "/ecs/laravel"
-    scheduler = "/ecs/laravel-scheduler"
-    worker    = "/ecs/laravel-worker"
+    main      = "/ecs/${var.application}"
+    scheduler = "/ecs/${var.application}-scheduler"
+    worker    = "/ecs/${var.application}-worker"
     codebuild = {
-      builder = "/aws/codebuild/laravel/builder"
+      builder = "/aws/codebuild/${var.application}/builder"
     }
   }
 }

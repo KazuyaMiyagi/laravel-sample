@@ -8,17 +8,17 @@ version: 0.2
 # https://docs.aws.amazon.com/en_us/codebuild/latest/userguide/build-env-ref-env-vars.html
 #
 # These environment variables are injected from the codebuild settings
-# - ECR_REPOSITORY_NAME
-# - TARGET_STAGE
-# - ARTIFACT_DIR
-# - DOCKERHUB_USERNAME
+# - APPLICATION
 # - DOCKERHUB_PASSWORD
+# - DOCKERHUB_USERNAME
+# - ECR_REPOSITORY_NAME
+# - IMAGE1_PLACEHOLDER
+# - TARGET_STAGE
 env:
   git-credential-helper: yes
   variables:
     DOCKER_BUILDKIT: 1
-    ECR_REPOSITORY_NAME: "laravel"
-    TARGET_STAGE : "release"
+    ARTIFACT_DIR: "/tmp/artifact"
 phases:
 
   pre_build:
@@ -44,12 +44,12 @@ phases:
       - docker push ${REPOSITORY_URI}:latest
 
       # Create deploy config files
-      - mkdir $ARTIFACT_DIR
+      - mkdir ${ARTIFACT_DIR}
 
       # Create imagedefinitions.json
       # https://docs.aws.amazon.com/codepipeline/latest/userguide/file-reference.html#pipelines-create-image-definitions
-      - printf '[{"name":"laravel-scheduler","imageUri":"%s"}]' "${REPOSITORY_URI}:${IMAGE_TAG}" | tee ${ARTIFACT_DIR}/laravel-scheduler-imagedefinitions.json
-      - printf '[{"name":"laravel-worker","imageUri":"%s"}]' "${REPOSITORY_URI}:${IMAGE_TAG}" | tee ${ARTIFACT_DIR}/laravel-worker-imagedefinitions.json
+      - printf '[{"name":"%s-scheduler","imageUri":"%s"}]' "${APPLICATION}" "${REPOSITORY_URI}:${IMAGE_TAG}" | tee ${ARTIFACT_DIR}/${APPLICATION}-scheduler-imagedefinitions.json
+      - printf '[{"name":"%s-worker","imageUri":"%s"}]' "${APPLICATION}" "${REPOSITORY_URI}:${IMAGE_TAG}" | tee ${ARTIFACT_DIR}/${APPLICATION}-worker-imagedefinitions.json
 
       # Create imageDetail.json
       # https://docs.aws.amazon.com/codepipeline/latest/userguide/file-reference.html#file-reference-ecs-bluegreen
@@ -57,8 +57,8 @@ phases:
 
       # Create taskdef.json
       # https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-ecs-ecr-codedeploy.html#tutorials-ecs-ecr-codedeploy-taskdefinition
-      - aws ecs describe-task-definition --task-definition laravel > /tmp/taskdef.json
-      - jq ".taskDefinition.containerDefinitions[].image |= \"<IMAGE_NAME>\" | .taskDefinition" < /tmp/taskdef.json | tee ${ARTIFACT_DIR}/taskdef.json
+      - aws ecs describe-task-definition --task-definition "${APPLICATION}" > /tmp/taskdef.json
+      - jq ".taskDefinition.containerDefinitions[].image |= \"${IMAGE1_PLACEHOLDER}\" | .taskDefinition" < /tmp/taskdef.json | tee ${ARTIFACT_DIR}/taskdef.json
 
       # Create appspec.yaml
       # https://docs.aws.amazon.com/codepipeline/latest/userguide/tutorials-ecs-ecr-codedeploy.html#tutorials-ecs-ecr-codedeploy-taskdefinition
@@ -71,15 +71,15 @@ phases:
               Properties:
                 TaskDefinition: "<TASK_DEFINITION>"
                 LoadBalancerInfo:
-                  ContainerName: "laravel"
+                  ContainerName: "${APPLICATION}"
                   ContainerPort: 80
         EOF
 
 artifacts:
   files:
-    - laravel-scheduler-imagedefinitions.json
-    - laravel-worker-imagedefinitions.json
+    - ${APPLICATION}-scheduler-imagedefinitions.json
+    - ${APPLICATION}-worker-imagedefinitions.json
     - imageDetail.json
     - taskdef.json
     - appspec.yaml
-  base-directory: $ARTIFACT_DIR
+  base-directory: ${ARTIFACT_DIR}

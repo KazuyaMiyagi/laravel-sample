@@ -1,5 +1,5 @@
 resource "aws_lb" "main" {
-  name               = "main"
+  name               = var.application
   load_balancer_type = "application"
   internal           = false
 
@@ -18,25 +18,9 @@ resource "aws_lb" "main" {
   }
 }
 
-resource "aws_lb_target_group" "blue" {
-  name        = "blue"
-  port        = 80
-  protocol    = "HTTP"
-  target_type = "ip"
-  vpc_id      = aws_vpc.main.id
-
-  health_check {
-    path    = "/"
-    matcher = "200"
-  }
-
-  depends_on = [
-    aws_lb.main
-  ]
-}
-
-resource "aws_lb_target_group" "green" {
-  name        = "green"
+resource "aws_lb_target_group" "blue-green" {
+  count       = 2
+  name        = "${var.application}-blue-green-${count.index}"
   port        = 80
   protocol    = "HTTP"
   target_type = "ip"
@@ -85,13 +69,13 @@ resource "aws_lb_listener" "https" {
   }
 }
 
-resource "aws_alb_listener_rule" "https" {
+resource "aws_lb_listener_rule" "https" {
   listener_arn = aws_lb_listener.https.arn
   priority     = 1
 
   action {
     type             = "forward"
-    target_group_arn = aws_lb_target_group.blue.arn
+    target_group_arn = aws_lb_target_group.blue-green[0].arn
   }
 
   condition {

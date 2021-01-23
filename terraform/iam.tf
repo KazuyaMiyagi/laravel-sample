@@ -1,6 +1,6 @@
 # EcsTaskExecutionRole
 resource "aws_iam_role" "ecs_task_execution_role" {
-  name               = "Laravel-EcsTaskExecutionRole"
+  name               = "${title(var.application)}-EcsTaskExecutionRole"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_execution_role_assumerole.json
 }
 
@@ -21,7 +21,7 @@ data "aws_iam_policy_document" "ecs_task_execution_role_assumerole" {
 }
 
 resource "aws_iam_role_policy" "ecs_task_execution_role" {
-  name   = "Laravel-EcsTaskExecutionRole"
+  name   = "${title(var.application)}-EcsTaskExecutionRole"
   role   = aws_iam_role.ecs_task_execution_role.id
   policy = data.aws_iam_policy_document.ecs_task_execution_role.json
 }
@@ -49,14 +49,14 @@ data "aws_iam_policy_document" "ecs_task_execution_role" {
     effect = "Allow"
 
     resources = [
-      aws_secretsmanager_secret.laravel.arn
+      aws_secretsmanager_secret.main.arn
     ]
   }
 }
 
 # EcsTaskRole
 resource "aws_iam_role" "ecs_task_role" {
-  name               = "Laravel-EcsTaskRole"
+  name               = "${title(var.application)}-EcsTaskRole"
   assume_role_policy = data.aws_iam_policy_document.ecs_task_role_assumerole.json
 }
 
@@ -89,7 +89,7 @@ data "aws_iam_policy_document" "ecs_task_role_policy" {
 }
 
 resource "aws_iam_role_policy" "ecs_task_role_policy" {
-  name   = "Laravel-EcsTaskRole"
+  name   = "${title(var.application)}-EcsTaskRole"
   role   = aws_iam_role.ecs_task_role.id
   policy = data.aws_iam_policy_document.ecs_task_role_policy.json
 }
@@ -124,7 +124,7 @@ data "aws_iam_policy_document" "codebuild" {
       "ecr:*"
     ]
     resources = [
-      aws_ecr_repository.laravel.arn
+      aws_ecr_repository.main.arn
     ]
   }
   statement {
@@ -159,7 +159,7 @@ data "aws_iam_policy_document" "codebuild" {
       "secretsmanager:ListSecretVersionIds"
     ]
     resources = [
-      aws_secretsmanager_secret.codebuild_dockerhubcredential.arn
+      aws_secretsmanager_secret.dockerhub.arn
     ]
   }
   statement {
@@ -183,12 +183,12 @@ data "aws_iam_policy_document" "codebuild" {
 }
 
 resource "aws_iam_role" "codebuild" {
-  name               = "Laravel-Codebuild"
+  name               = "${title(var.application)}-Codebuild"
   assume_role_policy = data.aws_iam_policy_document.codebuild_assumerole.json
 }
 
 resource "aws_iam_role_policy" "codebuild" {
-  name   = "Laravel-Codebuild"
+  name   = "${title(var.application)}-Codebuild"
   role   = aws_iam_role.codebuild.id
   policy = data.aws_iam_policy_document.codebuild.json
 }
@@ -270,19 +270,19 @@ data "aws_iam_policy_document" "codepipeline" {
 }
 
 resource "aws_iam_role" "codepipeline" {
-  name               = "Laravel-CodePipeline"
+  name               = "${title(var.application)}-CodePipeline"
   assume_role_policy = data.aws_iam_policy_document.codepipeline_assumerole.json
 }
 
 resource "aws_iam_role_policy" "codepipeline" {
-  name   = "Laravel-CodePipeline"
+  name   = "${title(var.application)}-CodePipeline"
   role   = aws_iam_role.codepipeline.id
   policy = data.aws_iam_policy_document.codepipeline.json
 }
 
 # CodeDeploy
 resource "aws_iam_role" "codedeploy" {
-  name               = "Laravel-CodeDeploy"
+  name               = "${title(var.application)}-CodeDeploy"
   assume_role_policy = data.aws_iam_policy_document.codedeploy_assumerole.json
 }
 
@@ -303,7 +303,7 @@ data "aws_iam_policy_document" "codedeploy_assumerole" {
 }
 
 resource "aws_iam_role_policy" "codedeploy" {
-  name   = "Laravel-CodeDeploy"
+  name   = "${title(var.application)}-CodeDeploy"
   role   = aws_iam_role.codedeploy.id
   policy = data.aws_iam_policy_document.codedeploy.json
 }

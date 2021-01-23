@@ -1,5 +1,5 @@
-resource "aws_ecr_repository" "laravel" {
-  name = "laravel"
+resource "aws_ecr_repository" "main" {
+  name = var.application
 
   image_tag_mutability = "MUTABLE"
   image_scanning_configuration {
@@ -7,8 +7,8 @@ resource "aws_ecr_repository" "laravel" {
   }
 }
 
-resource "aws_ecr_lifecycle_policy" "laravel" {
-  repository = aws_ecr_repository.laravel.name
+resource "aws_ecr_lifecycle_policy" "main" {
+  repository = aws_ecr_repository.main.name
 
   policy = <<-EOF
 	{
