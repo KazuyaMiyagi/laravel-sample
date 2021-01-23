@@ -3,7 +3,7 @@
 server_tokens off;
 
 upstream php-fpm {
-    server 127.0.0.1:9000;
+    server localhost:9000;
 }
 
 server {

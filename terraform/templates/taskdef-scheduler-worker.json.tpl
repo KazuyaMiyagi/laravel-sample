@@ -1,43 +1,12 @@
 [
   {
-    "name": "${webserver_name}",
-    "image": "${image}",
-    "command": [
-      "${webserver_command}"
-    ],
-    "cpu": 0,
-    "portMappings": [
-      {
-        "containerPort": 80,
-        "hostPort": 80,
-        "protocol": "tcp"
-      }
-    ],
-    "essential": true,
-    "secrets": [],
-    "logConfiguration": {
-      "logDriver": "awslogs",
-      "options": {
-        "awslogs-group": "${webserver_awslogs_group}",
-        "awslogs-region": "${awslogs_region}",
-        "awslogs-stream-prefix": "ecs"
-      }
-    }
-  },
-  {
     "name": "${name}",
     "image": "${image}",
     "command": [
       "${command}"
     ],
     "cpu": 0,
-    "portMappings": [
-      {
-        "containerPort": 9000,
-        "hostPort": 9000,
-        "protocol": "tcp"
-      }
-    ],
+    "portMappings": [],
     "essential": true,
     "secrets": [
       {

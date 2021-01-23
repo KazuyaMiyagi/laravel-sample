@@ -71,7 +71,7 @@ phases:
               Properties:
                 TaskDefinition: "<TASK_DEFINITION>"
                 LoadBalancerInfo:
-                  ContainerName: "${APPLICATION}"
+                  ContainerName: "${APPLICATION}-webserver"
                   ContainerPort: 80
         EOF
 

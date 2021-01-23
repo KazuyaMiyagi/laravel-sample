@@ -22,6 +22,11 @@ variable "laravel_command" {
   default = "laravel"
 }
 
+variable "webserver_command" {
+  type    = string
+  default = "webserver"
+}
+
 variable "scheduler_command" {
   type    = string
   default = "laravel-scheduler"

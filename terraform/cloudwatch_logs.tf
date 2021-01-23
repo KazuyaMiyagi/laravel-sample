@@ -1,6 +1,7 @@
 locals {
   cloudwatch_log_group_name = {
     main      = "/ecs/${var.application}"
+    webserver = "/ecs/${var.application}-webserver"
     scheduler = "/ecs/${var.application}-scheduler"
     worker    = "/ecs/${var.application}-worker"
     codebuild = {
@@ -11,6 +12,10 @@ locals {
 
 resource "aws_cloudwatch_log_group" "main" {
   name = local.cloudwatch_log_group_name.main
+}
+
+resource "aws_cloudwatch_log_group" "webserver" {
+  name = local.cloudwatch_log_group_name.webserver
 }
 
 resource "aws_cloudwatch_log_group" "scheduler" {

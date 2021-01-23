@@ -3,9 +3,11 @@
 set -e
 
 case "${1:-}" in
-    "laravel")
-        /usr/local/sbin/php-fpm &
+    "webserver")
         exec /usr/bin/tini -- /usr/sbin/nginx -g "daemon off;"
+        ;;
+    "laravel")
+        exec /usr/bin/tini -- /usr/local/sbin/php-fpm
         ;;
     "laravel-scheduler")
         while sleep 60 ; do
@@ -19,7 +21,7 @@ case "${1:-}" in
         exec "$@"
         ;;
     *)
-        echo "Usage: ${0} {laravel|laravel-scheduler|laravel-worker|bash|sh}" >&2
+        echo "Usage: ${0} {webserver|laravel|laravel-scheduler|laravel-worker|bash|sh}" >&2
         exit 3
         ;;
 esac

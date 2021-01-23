@@ -20,8 +20,6 @@ RUN apt update \
         nginx \
         # for composer
         unzip \
-        # for laravel-scheduler
-        cron \
         # for pgsql php extension
         libpq5 libpq-dev \
         # for gd php extension

@@ -20,6 +20,10 @@ resource "aws_ecs_task_definition" "main" {
     awslogs_group  = local.cloudwatch_log_group_name.main
     awslogs_region = data.aws_region.current.name
     secrets_arn    = aws_secretsmanager_secret.main.arn
+
+    webserver_name          = "${var.application}-webserver"
+    webserver_command       = var.webserver_command
+    webserver_awslogs_group = local.cloudwatch_log_group_name.webserver
   })
 
   requires_compatibilities = [
@@ -54,7 +58,7 @@ resource "aws_ecs_service" "main" {
 
   load_balancer {
     target_group_arn = aws_lb_target_group.blue-green[0].arn
-    container_name   = var.application
+    container_name   = "${var.application}-webserver"
     container_port   = 80
   }
 
@@ -78,7 +82,7 @@ resource "aws_ecs_task_definition" "scheduler" {
   cpu                = var.ecs_cpu
   memory             = var.ecs_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions = templatefile("templates/taskdef.json.tpl", {
+  container_definitions = templatefile("templates/taskdef-scheduler-worker.json.tpl", {
     name           = "${var.application}-scheduler"
     image          = "${aws_ecr_repository.main.repository_url}:latest"
     command        = var.scheduler_command
@@ -125,7 +129,7 @@ resource "aws_ecs_task_definition" "worker" {
   cpu                = var.ecs_cpu
   memory             = var.ecs_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
-  container_definitions = templatefile("templates/taskdef.json.tpl", {
+  container_definitions = templatefile("templates/taskdef-scheduler-worker.json.tpl", {
     name           = "${var.application}-worker"
     image          = "${aws_ecr_repository.main.repository_url}:latest"
     command        = var.worker_command
