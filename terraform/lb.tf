@@ -89,3 +89,37 @@ resource "aws_lb_listener_rule" "https" {
     ignore_changes = [action]
   }
 }
+
+# echo
+resource "aws_lb_target_group" "echo" {
+  name        = "${var.application}-echo"
+  port        = 6001
+  protocol    = "HTTP"
+  target_type = "ip"
+  vpc_id      = aws_vpc.main.id
+
+  health_check {
+    path    = "/"
+    matcher = "200"
+  }
+
+  depends_on = [
+    aws_lb.main
+  ]
+}
+
+resource "aws_lb_listener_rule" "echo" {
+  listener_arn = aws_lb_listener.https.arn
+  priority     = 2
+
+  action {
+    type             = "forward"
+    target_group_arn = aws_lb_target_group.echo.arn
+  }
+
+  condition {
+    host_header {
+      values = ["echo.${var.domain_name}"]
+    }
+  }
+}

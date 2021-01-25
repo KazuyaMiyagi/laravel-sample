@@ -9,6 +9,7 @@
 !composer.lock
 !config
 !database
+!laravel-echo-server.json
 !package.json
 !phpunit.xml
 !public
@@ -23,8 +24,9 @@
 # ignore list
 
 Dockerfile
-bootstrap/cache/*
 README.md
+bootstrap/cache/*
+laravel-echo-server.Dockerfile
 storage/app/*
 storage/framework/cache/*
 storage/framework/sessions/*

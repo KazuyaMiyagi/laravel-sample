@@ -37,6 +37,65 @@ variable "worker_command" {
   default = "laravel-worker"
 }
 
+variable "laravel_echo_server_auth_host" {
+  type    = string
+  default = "http://localhost"
+}
+
+variable "laravel_echo_server_debug" {
+  type    = string
+  default = "false"
+}
+
+variable "laravel_echo_server_host" {
+  type    = string
+  default = ""
+}
+
+variable "laravel_echo_server_port" {
+  type    = string
+  default = "6001"
+}
+
+variable "laravel_echo_server_proto" {
+  type    = string
+  default = "http"
+}
+
+variable "laravel_echo_server_redis_host" {
+  type = string
+}
+
+variable "laravel_echo_server_redis_password" {
+  type    = string
+  default = ""
+}
+
+variable "laravel_echo_server_redis_port" {
+  type    = string
+  default = "6379"
+}
+
+variable "laravel_echo_server_ssl_cert" {
+  type    = string
+  default = ""
+}
+
+variable "laravel_echo_server_ssl_chain" {
+  type    = string
+  default = ""
+}
+
+variable "laravel_echo_server_ssl_key" {
+  type    = string
+  default = ""
+}
+
+variable "laravel_echo_server_ssl_pass" {
+  type    = string
+  default = ""
+}
+
 variable "repository" {
   type    = string
   default = "KazuyaMiyagi/laravel-sample"
