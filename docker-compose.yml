@@ -1,0 +1,34 @@
+version: "3.8"
+
+services:
+  laravel: &laravel
+    build:
+      context: .
+    command: bash -c "(docker-entrypoint.sh webserver &); docker-entrypoint.sh laravel"
+    env_file: .env
+    ports:
+      - 80:80
+
+  laravel-scheduler:
+    <<: *laravel
+    command: "laravel-scheduler"
+    ports: []
+
+  laravel-worker:
+    <<: *laravel
+    command: "laravel-worker"
+    ports: []
+
+  laravel-echo-server:
+    build:
+      context: .
+      dockerfile: laravel-echo-server.Dockerfile
+    environment:
+      - LARAVEL_ECHO_SERVER_REDIS_HOST=redis
+      - LARAVEL_ECHO_SERVER_AUTH_HOST=laravel
+      - LARAVEL_ECHO_SERVER_DEBUG=true
+    ports:
+      - 6001:6001
+
+  redis:
+    image: redis
