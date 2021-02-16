@@ -9,8 +9,8 @@ resource "aws_ecs_cluster" "main" {
 resource "aws_ecs_task_definition" "main" {
   family             = var.application
   network_mode       = "awsvpc"
-  cpu                = var.ecs_cpu
-  memory             = var.ecs_memory
+  cpu                = var.task_cpu
+  memory             = var.task_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
   container_definitions = templatefile("templates/taskdef.json.tpl", {
@@ -80,8 +80,8 @@ resource "aws_ecs_service" "main" {
 resource "aws_ecs_task_definition" "scheduler" {
   family             = "${var.application}-scheduler"
   network_mode       = "awsvpc"
-  cpu                = var.ecs_cpu
-  memory             = var.ecs_memory
+  cpu                = var.task_cpu
+  memory             = var.task_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
   container_definitions = templatefile("templates/taskdef-scheduler-worker.json.tpl", {
@@ -129,8 +129,8 @@ resource "aws_ecs_service" "scheduler" {
 resource "aws_ecs_task_definition" "worker" {
   family             = "${var.application}-worker"
   network_mode       = "awsvpc"
-  cpu                = var.ecs_cpu
-  memory             = var.ecs_memory
+  cpu                = var.task_cpu
+  memory             = var.task_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
   container_definitions = templatefile("templates/taskdef-scheduler-worker.json.tpl", {
@@ -179,8 +179,8 @@ resource "aws_ecs_service" "worker" {
 resource "aws_ecs_task_definition" "echo" {
   family             = "${var.application}-echo"
   network_mode       = "awsvpc"
-  cpu                = var.ecs_cpu
-  memory             = var.ecs_memory
+  cpu                = var.task_cpu
+  memory             = var.task_memory
   execution_role_arn = aws_iam_role.ecs_task_execution_role.arn
   task_role_arn      = aws_iam_role.ecs_task_role.arn
   container_definitions = templatefile("templates/taskdef-echo.json.tpl", {

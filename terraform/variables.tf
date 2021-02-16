@@ -7,12 +7,12 @@ variable "application" {
   default = "laravel"
 }
 
-variable "ecs_cpu" {
+variable "task_cpu" {
   type    = string
   default = "256"
 }
 
-variable "ecs_memory" {
+variable "task_memory" {
   type    = string
   default = "512"
 }
