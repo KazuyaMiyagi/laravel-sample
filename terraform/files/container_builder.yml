@@ -73,6 +73,8 @@ phases:
                 LoadBalancerInfo:
                   ContainerName: "${APPLICATION}-webserver"
                   ContainerPort: 80
+                # AWS Fargate platform versions: https://docs.aws.amazon.com/codedeploy/latest/userguide/reference-appspec-file-structure-resources.html
+                PlatformVersion: "1.4.0"
         EOF
 
 artifacts:
