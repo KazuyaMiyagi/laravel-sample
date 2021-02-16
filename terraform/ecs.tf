@@ -53,7 +53,7 @@ resource "aws_ecs_service" "main" {
     security_groups = [
       aws_security_group.main.id
     ]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   load_balancer {
@@ -113,7 +113,7 @@ resource "aws_ecs_service" "scheduler" {
     security_groups = [
       aws_security_group.main.id
     ]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   lifecycle {
@@ -161,7 +161,7 @@ resource "aws_ecs_service" "worker" {
     security_groups = [
       aws_security_group.main.id
     ]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   lifecycle {
