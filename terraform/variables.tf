@@ -63,7 +63,8 @@ variable "laravel_echo_server_proto" {
 }
 
 variable "laravel_echo_server_redis_host" {
-  type = string
+  type    = string
+  default = ""
 }
 
 variable "laravel_echo_server_redis_password" {
