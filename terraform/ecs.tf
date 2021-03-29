@@ -40,7 +40,6 @@ resource "aws_ecs_service" "main" {
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 100
   deployment_maximum_percent         = 200
-  health_check_grace_period_seconds  = 60
 
   deployment_controller {
     type = "CODE_DEPLOY"
@@ -104,8 +103,8 @@ resource "aws_ecs_service" "scheduler" {
   platform_version                   = "1.4.0"
   desired_count                      = 0
   launch_type                        = "FARGATE"
-  deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
 
   network_configuration {
     subnets = [
@@ -153,8 +152,8 @@ resource "aws_ecs_service" "worker" {
   platform_version                   = "1.4.0"
   desired_count                      = 0
   launch_type                        = "FARGATE"
-  deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
 
   network_configuration {
     subnets = [
@@ -212,10 +211,11 @@ resource "aws_ecs_service" "echo" {
   name                               = "${var.application}-echo"
   cluster                            = aws_ecs_cluster.main.arn
   task_definition                    = aws_ecs_task_definition.echo.arn
+  platform_version                   = "1.4.0"
   desired_count                      = 0
   launch_type                        = "FARGATE"
-  deployment_maximum_percent         = 200
   deployment_minimum_healthy_percent = 100
+  deployment_maximum_percent         = 200
 
   network_configuration {
     subnets = [
@@ -225,7 +225,7 @@ resource "aws_ecs_service" "echo" {
     security_groups = [
       aws_security_group.echo.id
     ]
-    assign_public_ip = true
+    assign_public_ip = false
   }
 
   load_balancer {
