@@ -2,7 +2,7 @@ output "route53_zone_name_servers" {
   value = aws_route53_zone.main.name_servers
 }
 
-output "terraform_managed_taskdef_revinsions" {
+output "terraform_managed_taskdef_revisions" {
   value = {
     "main"      = aws_ecs_task_definition.main.revision
     "echo"      = aws_ecs_task_definition.echo.revision
