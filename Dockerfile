@@ -51,7 +51,7 @@ COPY . .
 RUN chown -R root:www-data storage && chmod -R 775 storage
 
 # Install Composer packages without development package
-RUN composer install --no-dev
+RUN composer install --no-progress --no-dev
 
 ENTRYPOINT ["/usr/local/bin/docker-entrypoint.sh"]
 CMD ["laravel"]
@@ -59,4 +59,4 @@ CMD ["laravel"]
 FROM release AS develop
 
 # Install Composer packages with development package
-RUN composer install --dev
+RUN composer install --no-progress --dev
