@@ -19,6 +19,7 @@ env:
   variables:
     DOCKER_BUILDKIT: 1
     ARTIFACT_DIR: "/tmp/artifact"
+    TRIVY_CACHE_DIR: "/var/cache/trivy"
 phases:
 
   pre_build:
@@ -33,6 +34,14 @@ phases:
 
       # ECR login
       - aws ecr get-login-password --region ${AWS_REGION} | docker login --username AWS --password-stdin ${REPOSITORY_URI}
+
+      # Trivy install
+      - apt-get update
+      - apt-get install --yes --no-install-recommends wget apt-transport-https gnupg lsb-release
+      - wget -qO - https://aquasecurity.github.io/trivy-repo/deb/public.key | apt-key add -
+      - echo deb https://aquasecurity.github.io/trivy-repo/deb $(lsb_release -sc) main | tee -a /etc/apt/sources.list.d/trivy.list
+      - apt-get update
+      - apt-get install --yes --no-install-recommends trivy
   build:
     commands:
       - docker build --target ${TARGET_STAGE} --tag ${REPOSITORY_URI}:${IMAGE_TAG} . || docker build --tag ${REPOSITORY_URI}:${IMAGE_TAG} .
@@ -40,6 +49,11 @@ phases:
 
   post_build:
     commands:
+      # run static scan using https://github.com/aquasecurity/trivy
+      - trivy image --no-progress ${REPOSITORY_URI}:${IMAGE_TAG}
+      # If a fixed version of the package is available, an error code will be returned.
+      - trivy image --no-progress --exit-code 1 --ignore-unfixed ${REPOSITORY_URI}:${IMAGE_TAG}
+
       - docker push ${REPOSITORY_URI}:${IMAGE_TAG}
       - docker push ${REPOSITORY_URI}:latest
 
@@ -85,3 +99,7 @@ artifacts:
     - taskdef.json
     - appspec.yaml
   base-directory: ${ARTIFACT_DIR}
+
+cache:
+  paths:
+    - ${TRIVY_CACHE_DIR}/**/*
