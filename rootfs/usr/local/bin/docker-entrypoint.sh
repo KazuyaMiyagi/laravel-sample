@@ -15,7 +15,7 @@ case "${1:-}" in
         done
         ;;
     "laravel-worker")
-        exec /usr/bin/tini -- /usr/local/bin/php /usr/src/app/artisan queue:work
+        exec /usr/bin/tini -- /usr/local/bin/php /usr/src/app/artisan horizon
         ;;
     "/bin/sh" | "sh" | "/bin/bash" | "bash" )
         exec "$@"
