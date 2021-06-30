@@ -1,3 +1,12 @@
+FROM node:fermium-buster-slim AS node
+WORKDIR /usr/src/app
+COPY package*.json ./
+COPY webpack.mix.js .
+COPY resources resources
+COPY artisan artisan
+RUN npm install
+RUN npm run production
+
 FROM composer:2 AS composer
 FROM php:7.4-fpm AS release
 
@@ -47,6 +56,12 @@ WORKDIR /usr/src/app
 # Copy all source files to /usr/src/app for production.
 # But available to overwrite by volume option when development.
 COPY . .
+
+# Install laravel-echo socket.io-client
+COPY --from=node  /usr/src/app/node_modules node_modules
+
+# Install Laravel Mix Compiled files
+COPY --from=node  /usr/src/app/public public
 
 RUN chown -R root:www-data storage && chmod -R 775 storage
 

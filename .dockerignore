@@ -10,6 +10,7 @@
 !config
 !database
 !laravel-echo-server.json
+!package-lock.json
 !package.json
 !phpunit.xml
 !public

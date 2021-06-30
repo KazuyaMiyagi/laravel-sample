@@ -18,3 +18,7 @@ Route::get('/', function () {
 Route::get('/phpinfo', function () {
     phpinfo();
 });
+
+Route::get('/event', function(){
+    broadcast(new \App\Events\PublicEvent());
+});
