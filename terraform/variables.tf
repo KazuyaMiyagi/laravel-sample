@@ -112,6 +112,14 @@ variable "enable_approve_action" {
   default = true
 }
 
+variable "dockerhub_username" {
+  type = string
+}
+
+variable "dockerhub_password" {
+  type = string
+}
+
 variable "github_token" {
   type = string
 }
