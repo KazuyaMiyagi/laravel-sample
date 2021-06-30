@@ -53,6 +53,12 @@ resource "aws_codebuild_project" "container_builder" {
     }
 
     environment_variable {
+      name  = "GITHUB_TOKEN"
+      type  = "SECRETS_MANAGER"
+      value = "${aws_secretsmanager_secret.github.arn}:::"
+    }
+
+    environment_variable {
       name  = "IMAGE1_PLACEHOLDER"
       type  = "PLAINTEXT"
       value = "<${local.image1_container_name}>"
@@ -73,6 +79,7 @@ resource "aws_codebuild_project" "container_builder" {
     type = "LOCAL"
     modes = [
       "LOCAL_DOCKER_LAYER_CACHE",
+      "LOCAL_CUSTOM_CACHE",
     ]
   }
 

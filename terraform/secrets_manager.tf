@@ -4,6 +4,17 @@ resource "aws_secretsmanager_secret" "dockerhub" {
   recovery_window_in_days = 30
 }
 
+resource "aws_secretsmanager_secret" "github" {
+  name                    = "/CodeBuild/GitHubCredential"
+  description             = "GitHub login credentials.  see https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token#creating-a-token"
+  recovery_window_in_days = 30
+}
+
+resource "aws_secretsmanager_secret_version" "github" {
+  secret_id     = aws_secretsmanager_secret.github.id
+  secret_string = var.github_token
+}
+
 resource "aws_secretsmanager_secret" "main" {
   name                    = "/ECS/${title(var.application)}"
   description             = "${title(var.application)} Environment data."

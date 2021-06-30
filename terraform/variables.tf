@@ -111,3 +111,7 @@ variable "enable_approve_action" {
   type    = bool
   default = true
 }
+
+variable "github_token" {
+  type = string
+}
