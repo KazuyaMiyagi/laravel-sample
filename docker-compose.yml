@@ -3,8 +3,12 @@ version: "3.8"
 services:
   laravel: &laravel
     build:
+#      target: release
+      target: develop
       context: .
     command: bash -c "(docker-entrypoint.sh webserver &); docker-entrypoint.sh laravel"
+#    volumes:
+#      - ${PWD}:/usr/src/app
     env_file: .env
     ports:
       - 80:80
@@ -32,3 +36,16 @@ services:
 
   redis:
     image: redis
+
+  postgres:
+    image: postgres
+    environment:
+      - POSTGRES_DB=default
+      - POSTGRES_USER=laravel
+      - POSTGRES_PASSWORD=secret
+
+  mail:
+    image: mailhog/mailhog:latest
+    ports:
+      - "8025:8025"
+      - "1025:1025"
