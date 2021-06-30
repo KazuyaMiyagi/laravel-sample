@@ -60,3 +60,6 @@ FROM release AS develop
 
 # Install Composer packages with development package
 RUN composer install --no-progress --dev
+
+# Enable Laravel telescope
+RUN php artisan telescope:publish
