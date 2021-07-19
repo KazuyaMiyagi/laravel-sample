@@ -17,13 +17,13 @@ resource "aws_ecs_task_definition" "main" {
     name           = var.application
     image          = "${aws_ecr_repository.main.repository_url}:latest"
     command        = var.laravel_command
-    awslogs_group  = local.cloudwatch_log_group_name.main
+    awslogs_group  = aws_cloudwatch_log_group.main.name
     awslogs_region = data.aws_region.current.name
     secrets_arn    = aws_secretsmanager_secret.main.arn
 
     webserver_name          = "${var.application}-webserver"
     webserver_command       = var.webserver_command
-    webserver_awslogs_group = local.cloudwatch_log_group_name.webserver
+    webserver_awslogs_group = aws_cloudwatch_log_group.webserver.name
   })
 
   requires_compatibilities = [
@@ -87,7 +87,7 @@ resource "aws_ecs_task_definition" "scheduler" {
     name           = "${var.application}-scheduler"
     image          = "${aws_ecr_repository.main.repository_url}:latest"
     command        = var.scheduler_command
-    awslogs_group  = local.cloudwatch_log_group_name.scheduler
+    awslogs_group  = aws_cloudwatch_log_group.scheduler.name
     awslogs_region = data.aws_region.current.name
     secrets_arn    = aws_secretsmanager_secret.main.arn
   })
@@ -136,7 +136,7 @@ resource "aws_ecs_task_definition" "worker" {
     name           = "${var.application}-worker"
     image          = "${aws_ecr_repository.main.repository_url}:latest"
     command        = var.worker_command
-    awslogs_group  = local.cloudwatch_log_group_name.worker
+    awslogs_group  = aws_cloudwatch_log_group.worker.name
     awslogs_region = data.aws_region.current.name
     secrets_arn    = aws_secretsmanager_secret.main.arn
   })
@@ -185,7 +185,7 @@ resource "aws_ecs_task_definition" "echo" {
   container_definitions = templatefile("templates/taskdef-echo.json.tpl", {
     name           = "${var.application}-echo"
     image          = "${aws_ecr_repository.echo.repository_url}:latest"
-    awslogs_group  = local.cloudwatch_log_group_name.echo
+    awslogs_group  = aws_cloudwatch_log_group.echo.name
     awslogs_region = data.aws_region.current.name
     secrets_arn    = aws_secretsmanager_secret.main.arn
 
