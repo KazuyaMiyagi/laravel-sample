@@ -159,7 +159,8 @@ data "aws_iam_policy_document" "codebuild" {
       "secretsmanager:ListSecretVersionIds"
     ]
     resources = [
-      aws_secretsmanager_secret.dockerhub.arn
+      aws_secretsmanager_secret.dockerhub.arn,
+      aws_secretsmanager_secret.github.arn,
     ]
   }
   statement {
