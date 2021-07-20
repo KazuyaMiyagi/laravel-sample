@@ -4,6 +4,14 @@ resource "aws_ecs_cluster" "main" {
     name  = "containerInsights"
     value = "enabled"
   }
+  configuration {
+    execute_command_configuration {
+      logging    = "OVERRIDE"
+      log_configuration {
+        cloud_watch_log_group_name     = aws_cloudwatch_log_group.ecs_execute_command.name
+      }
+    }
+  }
 }
 
 resource "aws_ecs_task_definition" "main" {
@@ -36,6 +44,7 @@ resource "aws_ecs_service" "main" {
   cluster                            = aws_ecs_cluster.main.arn
   task_definition                    = aws_ecs_task_definition.main.arn
   platform_version                   = "1.4.0"
+  enable_execute_command             = true
   desired_count                      = 0
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 100
@@ -101,6 +110,7 @@ resource "aws_ecs_service" "scheduler" {
   cluster                            = aws_ecs_cluster.main.arn
   task_definition                    = aws_ecs_task_definition.scheduler.arn
   platform_version                   = "1.4.0"
+  enable_execute_command             = true
   desired_count                      = 0
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 100
@@ -150,6 +160,7 @@ resource "aws_ecs_service" "worker" {
   cluster                            = aws_ecs_cluster.main.arn
   task_definition                    = aws_ecs_task_definition.worker.arn
   platform_version                   = "1.4.0"
+  enable_execute_command             = true
   desired_count                      = 0
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 100
@@ -212,6 +223,7 @@ resource "aws_ecs_service" "echo" {
   cluster                            = aws_ecs_cluster.main.arn
   task_definition                    = aws_ecs_task_definition.echo.arn
   platform_version                   = "1.4.0"
+  enable_execute_command             = true
   desired_count                      = 0
   launch_type                        = "FARGATE"
   deployment_minimum_healthy_percent = 100

@@ -169,6 +169,9 @@
         "awslogs-region": "${awslogs_region}",
         "awslogs-stream-prefix": "ecs"
       }
+    },
+    "linuxParameters": {
+      "initProcessEnabled": true
     }
   }
 ]

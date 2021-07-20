@@ -80,10 +80,32 @@ data "aws_iam_policy_document" "ecs_task_role_policy" {
   statement {
     effect = "Allow"
     actions = [
-      "secretsmanager:ListSecrets"
+      "ssmmessages:CreateControlChannel",
+      "ssmmessages:CreateDataChannel",
+      "ssmmessages:OpenControlChannel",
+      "ssmmessages:OpenDataChannel",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:DescribeLogGroups",
+    ]
+    resources = ["*"]
+  }
+
+  statement {
+    effect = "Allow"
+    actions = [
+      "logs:CreateLogStream",
+      "logs:DescribeLogStreams",
+      "logs:PutLogEvents",
     ]
     resources = [
-      "*"
+      aws_cloudwatch_log_group.ecs_execute_command.arn,
+      "${aws_cloudwatch_log_group.ecs_execute_command.arn}:*",
     ]
   }
 }
