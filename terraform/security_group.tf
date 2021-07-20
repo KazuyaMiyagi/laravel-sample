@@ -40,7 +40,7 @@ resource "aws_security_group" "echo" {
   }
 
   tags = {
-    Name = var.application
+    Name = "${var.application}-echo"
   }
 }
 
