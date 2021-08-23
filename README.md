@@ -7,7 +7,7 @@ Architecture diagram
 
 <details open>
 
-![](./documents/architecture-diagram.svg)
+![](./documents/architecture.drawio.svg)
 
 </details>
 
@@ -16,6 +16,6 @@ Deployment pipeline diagram
 
 <details open>
 
-![](./documents/deployment-pipeline-diagram.svg)
+![](./documents/deployment-pipeline.drawio.svg)
 
 </details>
