@@ -1,7 +1,17 @@
 # https://www.terraform.io/docs/language/settings/index.html#specifying-a-required-terraform-version
 # terraform settings
 terraform {
-  required_version = "~> 1.0.5"
+  required_version = "~> 1.3"
+  required_providers {
+    aws = {
+      source  = "hashicorp/aws"
+      version = "~> 4.0"
+    }
+  }
+}
+
+provider "aws" {
+  region = "ap-northeast-1"
 }
 
 # https://www.terraform.io/docs/providers/aws/d/caller_identity.html
