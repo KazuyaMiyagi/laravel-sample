@@ -1,3 +1,15 @@
+data "aws_route53_zone" "ancestor" {
+  name = var.ancestor_domain_name
+}
+
+resource "aws_route53_record" "ancestor_ns" {
+  zone_id = data.aws_route53_zone.ancestor.zone_id
+  name    = var.domain_name
+  type    = "NS"
+  records = aws_route53_zone.main.name_servers
+  ttl     = 300
+}
+
 resource "aws_route53_zone" "main" {
   name          = var.domain_name
   comment       = "DNS Zone for ${var.domain_name}"
